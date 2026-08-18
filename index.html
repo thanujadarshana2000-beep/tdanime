@@ -287,11 +287,18 @@ function selectMode(mode) {
 
     currentMode = mode;
 
-    const textMode = document.getElementById("textMode");
-    const imageMode = document.getElementById("imageMode");
+    const textMode =
+        document.getElementById("textMode");
 
-    const textTab = document.getElementById("textTab");
-    const imageTab = document.getElementById("imageTab");
+    const imageMode =
+        document.getElementById("imageMode");
+
+    const textTab =
+        document.getElementById("textTab");
+
+    const imageTab =
+        document.getElementById("imageTab");
+
 
     if (mode === "text") {
 
@@ -326,6 +333,7 @@ function previewImage() {
         URL.createObjectURL(file);
 
     preview.src = imageURL;
+
     preview.style.display = "block";
 }
 
@@ -348,13 +356,17 @@ async function generateVideo() {
     let prompt = "";
 
 
-    // Text → Video
+    // =========================
+    // TEXT → VIDEO
+    // =========================
+
     if (currentMode === "text") {
 
         prompt =
             document.getElementById("prompt")
             .value
             .trim();
+
 
         if (!prompt) {
 
@@ -368,19 +380,27 @@ async function generateVideo() {
     }
 
 
-    // Image → Video
+    // =========================
+    // IMAGE → VIDEO
+    // =========================
+
     else {
 
         alert(
-            "Image → Video will be connected in the next step."
+            "Image → Video will be connected next."
         );
 
         return;
     }
 
 
+    // =========================
+    // START GENERATION
+    // =========================
+
     status.innerText =
         "⏳ Sending prompt to AI...";
+
 
     downloadButton.style.display =
         "none";
@@ -422,20 +442,40 @@ async function generateVideo() {
         );
 
 
+        // =========================
+        // API ERROR
+        // =========================
+
         if (!response.ok) {
 
             throw new Error(
+                data.detail ||
                 data.error ||
                 "AI generation failed"
             );
         }
 
 
-        // Replicate completed video
+        // =========================
+        // VIDEO READY
+        // =========================
+
         if (data.output) {
 
-            video.src =
+            let videoURL =
                 data.output;
+
+
+            // Some APIs return an array
+            if (Array.isArray(videoURL)) {
+
+                videoURL =
+                    videoURL[0];
+            }
+
+
+            video.src =
+                videoURL;
 
             video.style.display =
                 "block";
@@ -443,21 +483,23 @@ async function generateVideo() {
             placeholder.style.display =
                 "none";
 
+
             downloadButton.href =
-                data.output;
+                videoURL;
 
             downloadButton.style.display =
                 "block";
 
+
             status.innerText =
                 "✅ Anime video generated!";
 
-        }
 
-        else {
+        } else {
 
             status.innerText =
-                "⏳ Video generation is still processing.";
+                "⏳ Video is still processing...";
+
 
             console.log(
                 "Prediction:",
@@ -468,7 +510,11 @@ async function generateVideo() {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Generation Error:",
+            error
+        );
+
 
         status.innerText =
             "❌ " + error.message;
@@ -476,46 +522,6 @@ async function generateVideo() {
 
 }
 
-        status.innerText =
-            "⏳ Your prompt is ready for the AI video generator.";
-
-    } else {
-
-        const image =
-            document.getElementById("imageInput").files[0];
-
-        const prompt =
-            document.getElementById("imagePrompt").value.trim();
-
-        if (!image) {
-
-            alert("Please upload an image.");
-
-            return;
-        }
-
-        if (!prompt) {
-
-            alert("Please enter an animation prompt.");
-
-            return;
-        }
-
-        status.innerText =
-            "⏳ Your image and prompt are ready for the AI video generator.";
-    }
-
-    /*
-       IMPORTANT:
-
-       The real AI video API will be connected here later.
-
-       We will NOT put any private API key directly
-       inside this HTML file.
-    */
-}
-
 </script>
-
 </body>
 </html>
