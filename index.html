@@ -4,53 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Anime Video Generator</title>
+    <title>TD Anime AI</title>
 
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
 
         body {
+            margin: 0;
             font-family: Arial, sans-serif;
-            min-height: 100vh;
-            background: #0b0b16;
+            background: #090914;
             color: white;
-            display: flex;
-            justify-content: center;
-            padding: 30px 15px;
+        }
+
+        header {
+            text-align: center;
+            padding: 35px 15px 20px;
+        }
+
+        header h1 {
+            font-size: 38px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #aaa;
         }
 
         .container {
-            width: 100%;
-            max-width: 900px;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 38px;
-            margin-bottom: 10px;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #aaa;
-            margin-bottom: 30px;
+            width: 92%;
+            max-width: 850px;
+            margin: auto;
         }
 
         .card {
-            background: #151525;
-            border: 1px solid #292943;
+            background: #151522;
+            border: 1px solid #29293b;
             border-radius: 18px;
-            padding: 25px;
+            padding: 22px;
             margin-bottom: 20px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 13px;
+            border: 0;
+            border-radius: 10px;
+            background: #242438;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: #7c4dff;
         }
 
         label {
             display: block;
-            margin-bottom: 10px;
+            margin: 15px 0 8px;
             font-weight: bold;
         }
 
@@ -58,29 +77,37 @@
             width: 100%;
             min-height: 130px;
             resize: vertical;
-            border: none;
+            border: 0;
             outline: none;
             border-radius: 12px;
-            padding: 15px;
-            background: #0d0d19;
+            padding: 14px;
+            background: #0d0d18;
             color: white;
             font-size: 16px;
         }
 
         input[type="file"] {
             width: 100%;
-            margin-top: 5px;
             padding: 12px;
-            background: #0d0d19;
+            background: #0d0d18;
+            color: #bbb;
             border-radius: 10px;
-            color: #ccc;
         }
 
-        button {
+        .preview-image {
             width: 100%;
+            max-height: 350px;
+            object-fit: contain;
+            margin-top: 15px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .generate {
+            width: 100%;
+            padding: 16px;
             margin-top: 20px;
-            padding: 15px;
-            border: none;
+            border: 0;
             border-radius: 12px;
             background: #7c4dff;
             color: white;
@@ -89,143 +116,274 @@
             cursor: pointer;
         }
 
-        button:hover {
-            background: #6338d8;
+        .generate:hover {
+            background: #6339d8;
         }
 
-        .video-box {
-            width: 100%;
-            aspect-ratio: 16 / 9;
-            background: #08080f;
-            border-radius: 15px;
+        .status {
+            text-align: center;
+            color: #aaa;
+            margin-top: 15px;
+        }
+
+        .video-area {
+            background: #07070d;
+            border-radius: 14px;
+            min-height: 300px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #777;
             overflow: hidden;
         }
 
         video {
             width: 100%;
-            height: 100%;
-            object-fit: contain;
+            max-height: 500px;
+            display: none;
         }
 
         .download {
             display: none;
+            width: 100%;
             text-align: center;
-            text-decoration: none;
-            background: #16a085;
             padding: 14px;
+            margin-top: 15px;
             border-radius: 10px;
+            background: #159957;
             color: white;
+            text-decoration: none;
             font-weight: bold;
-            margin-top: 15px;
         }
 
-        .status {
+        .hidden {
+            display: none;
+        }
+
+        footer {
             text-align: center;
-            margin-top: 15px;
-            color: #aaa;
-        }
-
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 28px;
-            }
-
-            .card {
-                padding: 18px;
-            }
+            color: #666;
+            padding: 30px;
         }
     </style>
 </head>
 
 <body>
 
+<header>
+    <h1>🎬 TD Anime AI</h1>
+    <p>Create anime videos from text or images</p>
+</header>
+
 <div class="container">
-
-    <h1>🎬 Anime Video Generator</h1>
-
-    <p class="subtitle">
-        Create amazing anime videos with AI
-    </p>
 
     <div class="card">
 
-        <label for="prompt">✨ Describe your video</label>
+        <div class="tabs">
 
-        <textarea
-            id="prompt"
-            placeholder="Example: Anime boy walking through a beautiful Japanese forest at sunset, cinematic camera movement..."
-        ></textarea>
+            <button
+                class="tab active"
+                id="textTab"
+                onclick="selectMode('text')">
+                ✨ Text → Video
+            </button>
 
-        <br><br>
+            <button
+                class="tab"
+                id="imageTab"
+                onclick="selectMode('image')">
+                🖼️ Image → Video
+            </button>
 
-        <label for="image">🖼️ Upload an image (optional)</label>
+        </div>
 
-        <input
-            type="file"
-            id="image"
-            accept="image/*"
-        >
+        <div id="textMode">
 
-        <button onclick="generateVideo()">
+            <label>Anime Video Prompt</label>
+
+            <textarea
+                id="prompt"
+                placeholder="Example: Anime boy walking through a Japanese forest at sunset, cinematic camera movement, beautiful lighting..."
+            ></textarea>
+
+        </div>
+
+        <div id="imageMode" class="hidden">
+
+            <label>Select an Image</label>
+
+            <input
+                type="file"
+                id="imageInput"
+                accept="image/*"
+                onchange="previewImage()"
+            >
+
+            <img
+                id="imagePreview"
+                class="preview-image"
+            >
+
+            <label>Animation Prompt</label>
+
+            <textarea
+                id="imagePrompt"
+                placeholder="Example: Make the character slowly walk forward while the camera moves around him..."
+            ></textarea>
+
+        </div>
+
+        <button
+            class="generate"
+            onclick="generateVideo()">
             🚀 Generate Anime Video
         </button>
 
-        <p class="status" id="status">
-            Ready to generate
-        </p>
+        <div class="status" id="status">
+            Ready
+        </div>
 
     </div>
 
     <div class="card">
 
-        <h2>🎥 Generated Video</h2>
+        <h2>🎥 Video Result</h2>
 
         <br>
 
-        <div class="video-box" id="videoBox">
-            Your generated video will appear here
+        <div class="video-area">
+
+            <span id="videoPlaceholder">
+                Generated video will appear here
+            </span>
+
+            <video
+                id="resultVideo"
+                controls>
+            </video>
+
         </div>
 
         <a
-            id="downloadBtn"
+            id="downloadButton"
             class="download"
-            download="anime-video.mp4"
-        >
-            ⬇️ Download Video
+            download="td-anime-video.mp4">
+            ⬇️ Download Anime Video
         </a>
 
     </div>
 
 </div>
 
+<footer>
+    TD Anime AI © 2026
+</footer>
+
 <script>
+
+let currentMode = "text";
+
+
+function selectMode(mode) {
+
+    currentMode = mode;
+
+    const textMode = document.getElementById("textMode");
+    const imageMode = document.getElementById("imageMode");
+
+    const textTab = document.getElementById("textTab");
+    const imageTab = document.getElementById("imageTab");
+
+    if (mode === "text") {
+
+        textMode.classList.remove("hidden");
+        imageMode.classList.add("hidden");
+
+        textTab.classList.add("active");
+        imageTab.classList.remove("active");
+
+    } else {
+
+        textMode.classList.add("hidden");
+        imageMode.classList.remove("hidden");
+
+        textTab.classList.remove("active");
+        imageTab.classList.add("active");
+    }
+}
+
+
+function previewImage() {
+
+    const file =
+        document.getElementById("imageInput").files[0];
+
+    const preview =
+        document.getElementById("imagePreview");
+
+    if (!file) return;
+
+    const imageURL =
+        URL.createObjectURL(file);
+
+    preview.src = imageURL;
+    preview.style.display = "block";
+}
+
 
 function generateVideo() {
 
-    const prompt = document.getElementById("prompt").value.trim();
-    const status = document.getElementById("status");
+    const status =
+        document.getElementById("status");
 
-    if (!prompt) {
-        alert("Please enter a video description first.");
-        return;
+    if (currentMode === "text") {
+
+        const prompt =
+            document.getElementById("prompt").value.trim();
+
+        if (!prompt) {
+
+            alert("Please enter an anime video prompt.");
+
+            return;
+        }
+
+        status.innerText =
+            "⏳ Your prompt is ready for the AI video generator.";
+
+    } else {
+
+        const image =
+            document.getElementById("imageInput").files[0];
+
+        const prompt =
+            document.getElementById("imagePrompt").value.trim();
+
+        if (!image) {
+
+            alert("Please upload an image.");
+
+            return;
+        }
+
+        if (!prompt) {
+
+            alert("Please enter an animation prompt.");
+
+            return;
+        }
+
+        status.innerText =
+            "⏳ Your image and prompt are ready for the AI video generator.";
     }
 
-    status.innerText = "⏳ AI video generation will start here...";
-
     /*
-       AI VIDEO API will be connected here later.
+       IMPORTANT:
 
-       For now this is only the website interface.
+       The real AI video API will be connected here later.
+
+       We will NOT put any private API key directly
+       inside this HTML file.
     */
-
-    setTimeout(() => {
-        status.innerText =
-            "✅ Website is working! AI generator will be connected in the next step.";
-    }, 1000);
 }
 
 </script>
